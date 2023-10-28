@@ -1,13 +1,13 @@
 package com.ashok.my.learnings.date.utils;
 
-import static com.ashok.my.learnings.date.constants.Constants.DATE_FORMAT;
-import static com.ashok.my.learnings.date.constants.Constants.YEAR_RANGE_MAX;
-import static com.ashok.my.learnings.date.constants.Constants.YEAR_RANGE_MIN;
+import static com.ashok.my.learnings.date.constants.Constants.INVALID_DATE_ERROR;
+import static com.ashok.my.learnings.date.constants.Constants.INVALID_INPUT_ERROR;
+import static com.ashok.my.learnings.date.constants.Constants.NO_INPUT_ERROR;
+import static com.ashok.my.learnings.date.constants.Constants.YEAR_OUT_OF_RANGE_ERROR;
 import static com.ashok.my.learnings.date.validator.ValidDateValidator.isValid;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 import com.ashok.my.learnings.date.exception.InvalidDateException;
@@ -21,28 +21,26 @@ public class DateCalculator {
 		String input = scanner.nextLine();
 		scanner.close();
 		DateCalculator calculator = new DateCalculator();
-		System.out.println(calculator.calculateDifference(input));
+		System.out.println("Output -> " + calculator.calculateDifference(input));
+		System.out.println("");
+		ArrayList<String> testData = new ArrayList<String>(Arrays.asList("01 01 2019,01 02 2020",
+				"01 01 2020,01 02 2019", "01 01 2019,01 02 2020", "01 01 2019, 01 02 2020", "01/01/2019,01 02 2020",
+				"01-01-2019,01 02 2020", "01 01 2019,01 02 2021", "01 01 2019,01 022020", "01 01 2019,  01 02 2020",
+				"01 01 2019,31 02 2020", "01 01 2019", " , ", "            ", "1 01 2019,01 02 2020"));
 
-		ArrayList<String> testData = new ArrayList<String>(
-				Arrays.asList("01 01 2019,01 02 2020", 
-						"01 01 2020,01 02 2019", 
-						"01 01 2019,01 02 2020",
-						"01 01 2019, 01 02 2020", 
-						"01/01/2019,01 02 2020", 
-						"01-01-2019,01 02 2020",
-						"01 01 2019,01 02 2021"));
-		
-		testData.forEach(lines -> {calculator.calculateDifference(lines));
+		testData.forEach(line -> {
+			System.out.println("Output -> " + calculator.calculateDifference(line));
+			System.out.println("");
+		});
 	}
 
-	private String calculateDifference(String input) {
+	public String calculateDifference(String input) {
 		try {
+			System.out.println("Input  -> " + input);
+
 			isInputSupplied(input);
 
 			String[] dateStrings = splitDates(input);
-
-			isValid(dateStrings[0]);
-			isValid(dateStrings[1]);
 
 			Date date1 = createDate(dateStrings[0]);
 			Date date2 = createDate(dateStrings[1]);
@@ -54,11 +52,10 @@ public class DateCalculator {
 			}
 
 			return date1 + ", " + date2 + ", Difference: " + difference + " days";
-		} catch (
-
-		InvalidDateException exception) {
+		} catch (InvalidDateException exception) {
 			return exception.getMessage();
-
+		} catch (Exception exception) {
+			return exception.getMessage();
 		}
 
 	}
@@ -66,20 +63,14 @@ public class DateCalculator {
 	private String[] splitDates(String input) {
 		String[] dateStrings = input.split(",");
 		if (dateStrings.length != 2) {
-			throw new InvalidDateException("Invalid input format. Please provide two dates separated by a comma."
-					+ "Invalid date supplied. Each Date should be in '" + DATE_FORMAT + "' format. "
-					+ "And length of date should be 10 chars inclusing space. " + "And Year should be between "
-					+ YEAR_RANGE_MIN + " and " + YEAR_RANGE_MAX + ". " + "Example : 25 03 2019.");
+			throw new InvalidDateException(String.format(INVALID_INPUT_ERROR, input));
 		}
 		return dateStrings;
 	}
 
 	private void isInputSupplied(String input) {
 		if (null == input || input.trim().isEmpty() || input.trim().isBlank()) {
-			throw new InvalidDateException("Invalid input format. Please provide two dates separated by a comma."
-					+ "Invalid date supplied. Each Date should be in '" + DATE_FORMAT + "' format. "
-					+ "And length of date should be 10 chars inclusing space. " + "And Year should be between "
-					+ YEAR_RANGE_MIN + " and " + YEAR_RANGE_MAX + ". " + "Example : 25 03 2019.");
+			throw new InvalidDateException(NO_INPUT_ERROR);
 		}
 	}
 
@@ -88,7 +79,7 @@ public class DateCalculator {
 
 		String[] parts = dateString.trim().split(" ");
 		if (parts.length != 3) {
-			return null;
+			throw new InvalidDateException(String.format(INVALID_DATE_ERROR, dateString));
 		}
 
 		try {
@@ -97,12 +88,12 @@ public class DateCalculator {
 			int year = Integer.parseInt(parts[2]);
 
 			if (year < 1900 || year > 2020) {
-				return null;
+				throw new InvalidDateException(String.format(YEAR_OUT_OF_RANGE_ERROR, dateString));
 			}
 
 			return new Date(day, month, year);
 		} catch (NumberFormatException e) {
-			return null;
+			throw new InvalidDateException(String.format(INVALID_DATE_ERROR, dateString));
 		}
 	}
 
