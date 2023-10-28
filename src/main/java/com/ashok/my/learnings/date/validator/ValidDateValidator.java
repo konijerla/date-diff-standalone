@@ -1,9 +1,6 @@
 package com.ashok.my.learnings.date.validator;
 
-import static com.ashok.my.learnings.date.constants.Constants.DATE_FORMAT;
-import static com.ashok.my.learnings.date.constants.Constants.DATE_FORMAT_REGEX;
-import static com.ashok.my.learnings.date.constants.Constants.YEAR_RANGE_MAX;
-import static com.ashok.my.learnings.date.constants.Constants.YEAR_RANGE_MIN;
+import static com.ashok.my.learnings.date.constants.Constants.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,41 +12,40 @@ public class ValidDateValidator {
 	Logger logger = LoggerFactory.getLogger(ValidDateValidator.class);
 
 	public static boolean isValid(String dateStr) {
+
 		// Check if the string matches the expected format "dd MM yyyy"
-		if (!dateStr.matches(DATE_FORMAT_REGEX)) {
-			throw new InvalidDateException(
-					"Invalid date '" + dateStr + "'supplied. Date should be in '" + DATE_FORMAT + "' format. "
-							+ "And length of date should be 10 chars inclusing space. " + "And Year should be between "
-							+ YEAR_RANGE_MIN + " and " + YEAR_RANGE_MAX + ". " + "Example : 25 03 2019.");
+		if (null == dateStr || dateStr.trim().isEmpty() || dateStr.trim().isBlank()
+				|| !dateStr.trim().matches(DATE_FORMAT_REGEX)) {
+
+			throw new InvalidDateException(String.format(INVALID_DATE_ERROR, dateStr));
 		}
 		// Split the string into day, month, and year
-		String[] parts = dateStr.split(" ");
+		String[] parts = dateStr.trim().split(" ");
 		int day = Integer.parseInt(parts[0]);
 		int month = Integer.parseInt(parts[1]);
 		int year = Integer.parseInt(parts[2]);
 
-		// Basic checks for day, month, and year
+		// Basic checks for year
+		if ( year < YEAR_RANGE_MIN || year > YEAR_RANGE_MAX) {
+			throw new InvalidDateException(String.format(YEAR_OUT_OF_RANGE_ERROR, dateStr));
+		}
+		
+		// Basic checks for day, month
 		if (day < 1 || day > 31 || month < 1 || month > 12 || year < YEAR_RANGE_MIN || year > YEAR_RANGE_MAX) {
-			throw new InvalidDateException("Invalid date supplied. Date should be in '" + DATE_FORMAT + "' format. "
-					+ "And length of date should be 10 chars inclusing space. " + "And Year should be between "
-					+ YEAR_RANGE_MIN + " and " + YEAR_RANGE_MAX + ". " + "Example : 25 03 2019.");
+			throw new InvalidDateException(String.format(INVALID_DATE_ERROR, dateStr));
 		}
 
 		// Additional checks for specific months (e.g., February)
 		if (month == 2) {
 			if ((day > 29) || (day == 29 && !isLeapYear(year))) {
-				throw new InvalidDateException("Invalid date supplied. Date should be in '" + DATE_FORMAT + "' format. "
-						+ "And length of date should be 10 chars inclusing space. " + "And Year should be between "
-						+ YEAR_RANGE_MIN + " and " + YEAR_RANGE_MAX + ". " + "Example : 25 03 2019.");
+				throw new InvalidDateException(String.format(INVALID_DATE_ERROR, dateStr));
 			}
 
 		}
 
 		// Additional checks for months with 30 days
 		if ((month == 4 || month == 6 || month == 9 || month == 11) && day > 30) {
-			throw new InvalidDateException("Invalid date supplied. Date should be in '" + DATE_FORMAT + "' format. "
-					+ "And length of date should be 10 chars inclusing space. " + "And Year should be between "
-					+ YEAR_RANGE_MIN + " and " + YEAR_RANGE_MAX + ". " + "Example : 25 03 2019.");
+			throw new InvalidDateException(String.format(INVALID_DATE_ERROR, dateStr));
 		}
 
 		return true;

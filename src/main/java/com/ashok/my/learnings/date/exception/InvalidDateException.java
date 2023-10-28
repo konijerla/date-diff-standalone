@@ -50,6 +50,4 @@ public class InvalidDateException extends RuntimeException {
 		super(message, cause, enableSuppression, writableStackTrace);
 	}
 
-	
-	
 }
